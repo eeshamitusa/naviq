@@ -58,4 +58,4 @@ Project Setup
 1. Clone the repository
 
 `bash
-git clone https://github.com/YOUR-USERNAME/RouteIQ.git
+git clone https://github.com/YOUR-USERNAME/NAVIQ.git
