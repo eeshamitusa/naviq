@@ -67,3 +67,4 @@ NAVIQ/Config/APIConfig.swift
 # API keys - never commit
 NAVIQ-draft/APIConfig.swift
 APIConfig.swift
+.DS_Store
