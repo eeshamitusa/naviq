@@ -1,0 +1,127 @@
+[
+  {
+    "name": "Circular Quay",
+    "location": "31 Alfred Street, Circular Quay NSW 2000",
+    "tags": [ "Harbour", "Ferries", "Landmarks" ]
+  },
+  {
+    "name": "Bondi Beach",
+    "location": "Bondi Pavilion, Queen Elizabeth Drive, Bondi Beach NSW 2026",
+    "tags": [ "Beach", "Scenic", "Surf" ]
+  },
+  {
+    "name": "Manly",
+    "location": "Manly Wharf Forecourt, East Esplanade, Manly NSW 2095",
+    "tags": [ "Beach", "Ferry", "Cafes" ]
+  },
+  {
+    "name": "Newtown",
+    "location": "King Street, Newtown NSW 2042",
+    "tags": [ "Food", "Nightlife", "Artsy" ]
+  },
+  {
+    "name": "Chatswood",
+    "location": "Victoria Avenue, Chatswood NSW 2067",
+    "tags": [ "Shopping", "Dining", "Convenient" ]
+  },
+  {
+    "name": "Parramatta",
+    "location": "Corner Pitt Street and Macquarie Street, Parramatta NSW 2150",
+    "tags": [ "Food", "History", "Riverside" ]
+  },
+  {
+    "name": "Darling Harbour",
+    "location": "14 Darling Drive, Darling Harbour NSW 2000",
+    "tags": [ "Waterfront", "Dining", "Family" ]
+  },
+  {
+    "name": "Barangaroo",
+    "location": "Hickson Road, Barangaroo NSW 2000",
+    "tags": [ "Waterfront", "Dining", "Walks" ]
+  },
+  {
+    "name": "The Rocks",
+    "location": "66 Harrington Street, The Rocks NSW 2000",
+    "tags": [ "Historic", "Markets", "Walking" ]
+  },
+  {
+    "name": "Cronulla",
+    "location": "20-38 Gerrale Street, Cronulla NSW 2230",
+    "tags": [ "Beach", "Relaxed", "Coastal" ]
+  },
+  {
+    "name": "Watsons Bay",
+    "location": "Military Road, Watsons Bay NSW 2030",
+    "tags": [ "Scenic", "Harbour", "Seafood" ]
+  },
+  {
+    "name": "Taronga Zoo Sydney",
+    "location": "Bradleys Head Road, Mosman NSW 2088",
+    "tags": [ "Family", "Animals", "Views" ]
+  },
+  {
+    "name": "Mosman",
+    "location": "Headland Park, Middle Head Road, Mosman NSW 2088",
+    "tags": [ "Scenic", "Walks", "Cafes" ]
+  },
+  {
+    "name": "Sydney Olympic Park",
+    "location": "5 Olympic Boulevard, Sydney Olympic Park NSW 2127",
+    "tags": [ "Events", "Sport", "Outdoors" ]
+  },
+  {
+    "name": "Katoomba",
+    "location": "Echo Point Road, Katoomba NSW 2780",
+    "tags": [ "Nature", "Lookouts", "Scenic" ]
+  },
+  {
+    "name": "Central Station",
+    "location": "1 Eddy Avenue, Haymarket NSW 2000",
+    "tags": [ "Transport Hub", "Convenient", "Shopping" ]
+  },
+  {
+    "name": "UTS Broadway",
+    "location": "15 Broadway, Ultimo NSW 2007",
+    "tags": [ "Students", "Cafes", "Convenient" ]
+  },
+  {
+    "name": "Coogee Beach",
+    "location": "Coogee Beach Access Road, Coogee NSW 2034",
+    "tags": [ "Beach", "Walks", "Scenic" ]
+  },
+  {
+    "name": "Surry Hills",
+    "location": "Crown Street, Surry Hills NSW 2010",
+    "tags": [ "Food", "Nightlife", "Artsy" ]
+  },
+  {
+    "name": "Glebe",
+    "location": "Glebe Point Road, Glebe NSW 2037",
+    "tags": [ "Markets", "Cafes", "Historic" ]
+  },
+  {
+    "name": "Rhodes",
+    "location": "Rhodes Waterside, 1 Rider Boulevard, Rhodes NSW 2138",
+    "tags": [ "Waterfront", "Shopping", "Dining" ]
+  },
+  {
+    "name": "Strathfield",
+    "location": "The Boulevarde, Strathfield NSW 2135",
+    "tags": [ "Dining", "Convenient", "Transport Hub" ]
+  },
+  {
+    "name": "Hornsby",
+    "location": "Westfield Hornsby, 236 Pacific Highway, Hornsby NSW 2077",
+    "tags": [ "Shopping", "Dining", "Relaxed" ]
+  },
+  {
+    "name": "Penrith",
+    "location": "High Street, Penrith NSW 2750",
+    "tags": [ "Outdoors", "Food", "Adventure" ]
+  },
+  {
+    "name": "Liverpool",
+    "location": "Macquarie Street, Liverpool NSW 2170",
+    "tags": [ "Shopping", "Dining", "Convenient" ]
+  }
+]

@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		A4350CB92FA75346001BFDF0 /* NAVIQ-draft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NAVIQ-draft.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A4350CB92FA75346001BFDF0 /* NAVIQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NAVIQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A4350CBB2FA75346001BFDF0 /* NAVIQ-draft */ = {
+		A4350CBB2FA75346001BFDF0 /* NAVIQ */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "NAVIQ-draft";
+			path = NAVIQ;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		A4350CB02FA75346001BFDF0 = {
 			isa = PBXGroup;
 			children = (
-				A4350CBB2FA75346001BFDF0 /* NAVIQ-draft */,
+				A4350CBB2FA75346001BFDF0 /* NAVIQ */,
 				A4350CBA2FA75346001BFDF0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		A4350CBA2FA75346001BFDF0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A4350CB92FA75346001BFDF0 /* NAVIQ-draft.app */,
+				A4350CB92FA75346001BFDF0 /* NAVIQ.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A4350CB82FA75346001BFDF0 /* NAVIQ-draft */ = {
+		A4350CB82FA75346001BFDF0 /* NAVIQ */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A4350CC42FA75347001BFDF0 /* Build configuration list for PBXNativeTarget "NAVIQ-draft" */;
+			buildConfigurationList = A4350CC42FA75347001BFDF0 /* Build configuration list for PBXNativeTarget "NAVIQ" */;
 			buildPhases = (
 				A4350CB52FA75346001BFDF0 /* Sources */,
 				A4350CB62FA75346001BFDF0 /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A4350CBB2FA75346001BFDF0 /* NAVIQ-draft */,
+				A4350CBB2FA75346001BFDF0 /* NAVIQ */,
 			);
-			name = "NAVIQ-draft";
+			name = NAVIQ;
 			packageProductDependencies = (
 			);
 			productName = "NAVIQ-draft";
-			productReference = A4350CB92FA75346001BFDF0 /* NAVIQ-draft.app */;
+			productReference = A4350CB92FA75346001BFDF0 /* NAVIQ.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -77,7 +77,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					A4350CB82FA75346001BFDF0 = {
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A4350CB42FA75346001BFDF0 /* Build configuration list for PBXProject "NAVIQ-draft" */;
+			buildConfigurationList = A4350CB42FA75346001BFDF0 /* Build configuration list for PBXProject "NAVIQ" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A4350CB82FA75346001BFDF0 /* NAVIQ-draft */,
+				A4350CB82FA75346001BFDF0 /* NAVIQ */,
 			);
 		};
 /* End PBXProject section */
@@ -253,6 +253,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NAVIQ;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +285,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NAVIQ;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -309,7 +311,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A4350CB42FA75346001BFDF0 /* Build configuration list for PBXProject "NAVIQ-draft" */ = {
+		A4350CB42FA75346001BFDF0 /* Build configuration list for PBXProject "NAVIQ" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A4350CC22FA75347001BFDF0 /* Debug */,
@@ -318,7 +320,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A4350CC42FA75347001BFDF0 /* Build configuration list for PBXNativeTarget "NAVIQ-draft" */ = {
+		A4350CC42FA75347001BFDF0 /* Build configuration list for PBXNativeTarget "NAVIQ" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A4350CC52FA75347001BFDF0 /* Debug */,
