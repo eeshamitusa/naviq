@@ -3,6 +3,14 @@ import Foundation
 struct DestinationGroup: Identifiable {
     let id = UUID()
     let title: String
-    let destinations: [Destination]
-    let bestPick: Destination?
+    let routes: [RouteResult]
+    let bestRoutePick: RouteResult?
+
+    var destinations: [Destination] {
+        routes.map(\.destination)
+    }
+
+    var bestPick: Destination? {
+        bestRoutePick?.destination
+    }
 }
