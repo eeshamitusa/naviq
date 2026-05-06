@@ -65,7 +65,7 @@ final class NSWAPIClient {
         var request = URLRequest(url: url)
         request.setValue("apikey \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-
+        
         let (data, response) = try await session.data(for: request)
 
         guard let http = response as? HTTPURLResponse else {
@@ -103,33 +103,32 @@ final class NSWAPIClient {
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
+
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HHmm"
 
-        let (destType, destName): (String, String) = {
-            if let stopId = destinationStopId {
-                return ("any", stopId)
-            } else {
-                return ("coord", destinationCoord.nswAPIString)
-            }
-        }()
+        let destType = "coord"
+        let destName = destinationCoord.nswAPIString
 
         components?.queryItems = [
-            URLQueryItem(name: "outputFormat",       value: "rapidJSON"),
-            URLQueryItem(name: "coordOutputFormat",  value: "EPSG:4326"),
-            URLQueryItem(name: "depArrMacro",        value: "dep"),
-            URLQueryItem(name: "itdDate",            value: dateFormatter.string(from: departureDate)),
-            URLQueryItem(name: "itdTime",            value: timeFormatter.string(from: departureDate)),
-            URLQueryItem(name: "type_origin",        value: "coord"),
-            URLQueryItem(name: "name_origin",        value: origin.nswAPIString),
-            URLQueryItem(name: "type_destination",   value: destType),
-            URLQueryItem(name: "name_destination",   value: destName),
-            URLQueryItem(name: "calcNumberOfTrips",  value: "3"),
-            URLQueryItem(name: "TfNSWTR",            value: "true"),
-            URLQueryItem(name: "version",            value: "10.2.1.42")
+            URLQueryItem(name: "outputFormat", value: "rapidJSON"),
+            URLQueryItem(name: "coordOutputFormat", value: "EPSG:4326"),
+            URLQueryItem(name: "depArrMacro", value: "dep"),
+            URLQueryItem(name: "itdDate", value: dateFormatter.string(from: departureDate)),
+            URLQueryItem(name: "itdTime", value: timeFormatter.string(from: departureDate)),
+            URLQueryItem(name: "type_origin", value: "coord"),
+            URLQueryItem(name: "name_origin", value: origin.nswAPIString),
+            URLQueryItem(name: "type_destination", value: destType),
+            URLQueryItem(name: "name_destination", value: destName),
+            URLQueryItem(name: "calcNumberOfTrips", value: "3"),
+            URLQueryItem(name: "TfNSWTR", value: "true"),
+            URLQueryItem(name: "version", value: "10.2.1.42")
         ]
 
-        guard let url = components?.url else { throw NSWAPIError.invalidURL }
+        guard let url = components?.url else {
+            throw NSWAPIError.invalidURL
+        }
+
         return url
     }
 

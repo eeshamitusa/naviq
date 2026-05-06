@@ -54,32 +54,39 @@ final class TransportService: TransportServiceProtocol {
         return filtered
     }
 
-    /// Call the NSW API for all 30 destinations in parallel using TaskGroup.
-    /// Serial calls would take ~15 seconds (30 x 0.5s). Parallel takes ~1 second.
+    /// Call the NSW API for all destinations one at a time.
+    /// This avoids HTTP 429 rate-limit errors from sending too many requests at once.
     private func fetchAllRoutesFromAPI(input: ExploreInput) async -> [RouteResult] {
 
-        return await withTaskGroup(of: RouteResult?.self) { group in
+        var results: [RouteResult] = []
 
-            for destination in MockData.destinations {
-                group.addTask { [apiClient] in
-                    do {
-                        return try await apiClient.fetchTrip(
-                            from: input.originCoordinate,
-                            to: destination,
-                            departureDate: input.departureDate
-                        )
-                    } catch {
-                        print("Warning: \(destination.name) API failed, using mock fallback: \(error.localizedDescription)")
-                        return MockData.allRoutes.first { $0.destination.id == destination.id }
-                    }
+        for destination in MockData.destinations {
+            do {
+                let route = try await apiClient.fetchTrip(
+                    from: input.originCoordinate,
+                    to: destination,
+                    departureDate: input.departureDate
+                )
+
+                results.append(route)
+
+                // Small delay to avoid hitting the NSW API rate limit.
+                try? await Task.sleep(nanoseconds: 500_000_000)
+
+            } catch {
+                print("Warning: \(destination.name) API failed, using mock fallback: \(error.localizedDescription)")
+
+                if let fallback = MockData.allRoutes.first(where: { $0.destination.id == destination.id }) {
+                    results.append(fallback)
+                }
+
+                // If rate limited, wait longer before trying the next destination.
+                if error.localizedDescription.contains("429") {
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
                 }
             }
-
-            var results: [RouteResult] = []
-            for await result in group {
-                if let route = result { results.append(route) }
-            }
-            return results
         }
+
+        return results
     }
 }
