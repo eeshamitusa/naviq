@@ -61,9 +61,4 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# NAVIQ — API keys (never commit)
-NAVIQ/Config/APIConfig.swift
 
-# API keys - never commit
-NAVIQ-draft/APIConfig.swift
-APIConfig.swift
