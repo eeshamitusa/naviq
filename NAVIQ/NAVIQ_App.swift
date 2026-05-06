@@ -1,6 +1,6 @@
 //
-//  NAVIQ_draftApp.swift
-//  NAVIQ-draft
+//  NAVIQApp.swift
+//  NAVIQ
 //
 //  Created by 이현지 on 3/5/2026.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct NAVIQ_draftApp: App {
+struct NAVIQApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

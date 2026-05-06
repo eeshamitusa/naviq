@@ -5,3 +5,7 @@ struct ContentView: View {
         DataLayerPreviewView()
     }
 }
+#Preview {
+    ContentView()
+}
+
