@@ -67,10 +67,32 @@ final class ExploreViewModel: ObservableObject {
     ) async {
         isLoading = true
         errorMessage = nil
+        clearResults()
+
+        let cleanedStartLocation = startLocationName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedSelectedTransport = selectedTransport.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        guard !cleanedStartLocation.isEmpty else {
+            errorMessage = "Please enter a start location."
+            isLoading = false
+            return
+        }
+
+        guard userTimeMinutes > 0 else {
+            errorMessage = "Please enter a valid available time."
+            isLoading = false
+            return
+        }
+
+        guard budget >= 0 else {
+            errorMessage = "Please enter a valid budget."
+            isLoading = false
+            return
+        }
 
         let input = ExploreInput(
-            originName: startLocationName,
-            originCoordinate: originCoordinate(for: startLocationName),
+            originName: cleanedStartLocation,
+            originCoordinate: originCoordinate(for: cleanedStartLocation),
             availableTimeMinutes: userTimeMinutes,
             budgetAUD: budget
         )
@@ -81,11 +103,18 @@ final class ExploreViewModel: ObservableObject {
             let matchesTime = route.travelTimeMinutes <= userTimeMinutes
             let matchesBudget = route.costAUD <= budget
 
+            let routeTransport = route.primaryTransportMode.displayName
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+
             let matchesTransport: Bool
-            if selectedTransport == "Any" {
+
+            if cleanedSelectedTransport == "any" {
                 matchesTransport = true
+            } else if cleanedSelectedTransport == "walk" {
+                matchesTransport = routeTransport == "walk" || routeTransport == "walking"
             } else {
-                matchesTransport = route.primaryTransportMode.displayName.lowercased() == selectedTransport.lowercased()
+                matchesTransport = routeTransport == cleanedSelectedTransport
             }
 
             return matchesTime && matchesBudget && matchesTransport
@@ -99,6 +128,7 @@ final class ExploreViewModel: ObservableObject {
                 if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
                     return firstRoute.costAUD < secondRoute.costAUD
                 }
+
                 return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
             }
 
@@ -111,6 +141,7 @@ final class ExploreViewModel: ObservableObject {
                 if firstRoute.costAUD == secondRoute.costAUD {
                     return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
                 }
+
                 return firstRoute.costAUD < secondRoute.costAUD
             }
 
@@ -123,6 +154,7 @@ final class ExploreViewModel: ObservableObject {
                 if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
                     return firstRoute.costAUD < secondRoute.costAUD
                 }
+
                 return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
             }
 
@@ -134,6 +166,7 @@ final class ExploreViewModel: ObservableObject {
                 if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
                     return firstRoute.costAUD < secondRoute.costAUD
                 }
+
                 return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
             }
 
@@ -165,18 +198,23 @@ final class ExploreViewModel: ObservableObject {
 
 
     private func selectBestPick(from routes: [RouteResult]) -> RouteResult? {
-        routes.max { first, second in
-            score(for: first) < score(for: second)
+        routes.max { firstRoute, secondRoute in
+            bestPickScore(for: firstRoute) < bestPickScore(for: secondRoute)
         }
     }
 
-    private func score(for route: RouteResult) -> Double {
-        let tagValue = Double(route.destination.tags.count) * 8
+    private func bestPickScore(for route: RouteResult) -> Double {
+        let destinationQualityScore = Double(route.destination.tags.count) * 8
         let categoryValue = categoryScore(for: route.destination.category)
         let timePenalty = Double(route.travelTimeMinutes) * 0.4
         let costPenalty = route.costAUD * 1.5
+        let liveDataBonus = route.isLiveData ? 5.0 : 0.0
 
-        return tagValue + categoryValue - timePenalty - costPenalty
+        return destinationQualityScore
+            + categoryValue
+            + liveDataBonus
+            - timePenalty
+            - costPenalty
     }
 
     private func categoryScore(for category: Category) -> Double {
