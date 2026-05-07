@@ -22,27 +22,31 @@ struct RouteScreenView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            mapOrPlaceholder
-                .frame(height: 300)
-                .overlay(alignment: .topLeading) {
-                    dataSourceBadge
-                        .padding()
+        ZStack {
+            Color(red: 0.07, green: 0.09, blue: 0.13).ignoresSafeArea()
+            VStack(spacing: 0) {
+                mapOrPlaceholder
+                    .frame(height: 300)
+                    .overlay(alignment: .topLeading) {
+                        dataSourceBadge
+                            .padding()
+                    }
+                
+                VStack(alignment: .leading, spacing: 18) {
+                    progressSection
+                    nextStepCard
+                    routeControls
+                    homeButton
                 }
-
-            VStack(alignment: .leading, spacing: 18) {
-                progressSection
-                nextStepCard
-                routeControls
-                homeButton
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Spacer(minLength: 0)
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            Spacer(minLength: 0)
         }
         .navigationTitle("Route")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     // MARK: - Map / fallback
@@ -67,12 +71,13 @@ struct RouteScreenView: View {
             HStack {
                 Text("Trip progress")
                     .font(.headline)
+                    .foregroundStyle(.white)
 
                 Spacer()
 
                 Text("Step \(min(currentStepIndex + 1, route.steps.count)) of \(route.steps.count)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.gray)
             }
 
             ProgressView(value: progress)
@@ -86,7 +91,7 @@ struct RouteScreenView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Next step")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.gray)
 
             if let step = currentStep {
                 HStack(alignment: .top, spacing: 12) {
@@ -98,23 +103,24 @@ struct RouteScreenView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(step.instruction)
                             .font(.headline)
+                            .foregroundStyle(.white)
 
                         Text("\(step.fromName) → \(step.toName)")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.gray)
 
                         Text("About \(step.durationMinutes) min")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.gray)
                     }
                 }
             } else {
                 Text("No route steps available.")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.gray)
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(red: 0.12, green: 0.16, blue: 0.24))
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
@@ -128,7 +134,7 @@ struct RouteScreenView: View {
                 }
             } label: {
                 Label("Back", systemImage: "chevron.left")
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity).foregroundStyle(.white)
             }
             .buttonStyle(.bordered)
             .disabled(currentStepIndex == 0)
@@ -154,10 +160,10 @@ struct RouteScreenView: View {
             Label("Home", systemImage: "house.fill")
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color(red: 0.12, green: 0.16, blue: 0.24))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .foregroundStyle(.primary)
+        .foregroundStyle(.white)
     }
 }
 

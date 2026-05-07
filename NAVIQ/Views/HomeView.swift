@@ -74,11 +74,7 @@ struct HomeView: View {
                     .padding(.bottom, 12)
 
                     // Smart Plan card
-                    NavigationLink(destination: Text("Smart Planning — Coming Soon")
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(red: 0.07, green: 0.09, blue: 0.13))
-                    ) {
+                    NavigationLink(destination: SmartPlanInputView()) {
                         HomeModeCard(
                             badge: "SMART PLAN",
                             badgeColor: Color(red: 0.6, green: 0.4, blue: 1.0),

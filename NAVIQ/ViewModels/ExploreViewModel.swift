@@ -62,7 +62,8 @@ final class ExploreViewModel: ObservableObject {
     func findReachableDestinations(
         startLocationName: String,
         userTimeMinutes: Int,
-        budget: Double
+        budget: Double,
+        selectedTransport: String = "Any"
     ) async {
         isLoading = true
         errorMessage = nil
@@ -74,8 +75,12 @@ final class ExploreViewModel: ObservableObject {
             budgetAUD: budget
         )
 
-        let matchingRoutes = await transportService.searchRoutes(input: input)
+        let allRoutes = await transportService.searchRoutes(input: input)
 
+        let matchingRoutes = selectedTransport == "Any" ? allRoutes : allRoutes.filter { route in
+            route.primaryTransportMode.displayName.lowercased() == selectedTransport.lowercased()
+        }
+        
         quickTripRoutes = matchingRoutes.filter { route in
             route.travelTimeMinutes <= 30
         }
