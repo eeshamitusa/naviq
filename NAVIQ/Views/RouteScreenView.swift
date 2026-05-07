@@ -163,24 +163,62 @@ struct RouteScreenView: View {
 
 private struct RouteMapPreview: View {
     let route: RouteResult
-
-    private var mapCamera: MapCameraPosition {
-        .region(
-            MKCoordinateRegion(
-                center: route.destination.coordinate.clLocation,
-                span: MKCoordinateSpan(latitudeDelta: 0.06, longitudeDelta: 0.06)
-            )
+    
+    @State private var cameraPosition: MapCameraPosition
+    
+    init(route: RouteResult) {
+        self.route = route
+        
+        let region = MKCoordinateRegion(
+            center: route.destination.coordinate.clLocation,
+            span: MKCoordinateSpan(latitudeDelta: 0.035, longitudeDelta: 0.035)
         )
+        
+        _cameraPosition = State(initialValue: .region(region))
     }
-
+    
     var body: some View {
-        if #available(iOS 17.0, *) {
-            Map(initialPosition: mapCamera) {
-                Marker(route.destination.name, coordinate: route.destination.coordinate.clLocation)
+        ZStack(alignment: .bottomLeading) {
+            Map(position: $cameraPosition) {
+                Marker(
+                    route.destination.name,
+                    coordinate: route.destination.coordinate.clLocation
+                )
+                .tint(.blue)
             }
-        } else {
-            RoutePlaceholderMap(route: route)
+            .mapStyle(.standard)
+            .mapControls {
+                MapCompass()
+                MapScaleView()
+            }
+            
+            destinationCard
+                .padding()
         }
+    }
+    
+    private var destinationCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(route.destination.name)
+                .font(.headline)
+                .foregroundStyle(.primary)
+            
+            Text(route.destination.streetAddress)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+            
+            HStack(spacing: 10) {
+                Label("\(route.travelTimeMinutes) min", systemImage: "clock")
+                Label(route.formattedCost, systemImage: "dollarsign.circle")
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.blue)
+        }
+        .padding(12)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(radius: 4)
     }
 }
 
