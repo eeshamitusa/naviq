@@ -77,27 +77,65 @@ final class ExploreViewModel: ObservableObject {
 
         let allRoutes = await transportService.searchRoutes(input: input)
 
-        let matchingRoutes = selectedTransport == "Any" ? allRoutes : allRoutes.filter { route in
-            route.primaryTransportMode.displayName.lowercased() == selectedTransport.lowercased()
-        }
-        
-        quickTripRoutes = matchingRoutes.filter { route in
-            route.travelTimeMinutes <= 30
+        let matchingRoutes = allRoutes.filter { route in
+            let matchesTime = route.travelTimeMinutes <= userTimeMinutes
+            let matchesBudget = route.costAUD <= budget
+
+            let matchesTransport: Bool
+            if selectedTransport == "Any" {
+                matchesTransport = true
+            } else {
+                matchesTransport = route.primaryTransportMode.displayName.lowercased() == selectedTransport.lowercased()
+            }
+
+            return matchesTime && matchesBudget && matchesTransport
         }
 
-        bestLeisureRoutes = matchingRoutes.filter { route in
-            route.travelTimeMinutes > 30 &&
-            route.travelTimeMinutes <= 60
-        }
+        quickTripRoutes = matchingRoutes
+            .filter { route in
+                route.travelTimeMinutes <= 30
+            }
+            .sorted { firstRoute, secondRoute in
+                if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
+                    return firstRoute.costAUD < secondRoute.costAUD
+                }
+                return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
+            }
 
-        longerTripRoutes = matchingRoutes.filter { route in
-            route.travelTimeMinutes > 60 &&
-            route.travelTimeMinutes <= 90
-        }
+        bestLeisureRoutes = matchingRoutes
+            .filter { route in
+                route.travelTimeMinutes > 30 &&
+                route.travelTimeMinutes <= 60
+            }
+            .sorted { firstRoute, secondRoute in
+                if firstRoute.costAUD == secondRoute.costAUD {
+                    return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
+                }
+                return firstRoute.costAUD < secondRoute.costAUD
+            }
 
-        dayTripRoutes = matchingRoutes.filter { route in
-            route.travelTimeMinutes > 90
-        }
+        longerTripRoutes = matchingRoutes
+            .filter { route in
+                route.travelTimeMinutes > 60 &&
+                route.travelTimeMinutes <= 90
+            }
+            .sorted { firstRoute, secondRoute in
+                if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
+                    return firstRoute.costAUD < secondRoute.costAUD
+                }
+                return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
+            }
+
+        dayTripRoutes = matchingRoutes
+            .filter { route in
+                route.travelTimeMinutes > 90
+            }
+            .sorted { firstRoute, secondRoute in
+                if firstRoute.travelTimeMinutes == secondRoute.travelTimeMinutes {
+                    return firstRoute.costAUD < secondRoute.costAUD
+                }
+                return firstRoute.travelTimeMinutes < secondRoute.travelTimeMinutes
+            }
 
         quickTripBestRoute = selectBestPick(from: quickTripRoutes)
         bestLeisureRoutePick = selectBestPick(from: bestLeisureRoutes)
@@ -105,39 +143,11 @@ final class ExploreViewModel: ObservableObject {
         dayTripBestRoute = selectBestPick(from: dayTripRoutes)
 
         if matchingRoutes.isEmpty {
-            errorMessage = "No destinations matched your time and budget."
+            errorMessage = "No destinations matched your time, budget, and transport preferences."
         }
 
         isLoading = false
     }
-
-    func groupedResults() -> [DestinationGroup] {
-        [
-            DestinationGroup(
-                title: "Quick Trips",
-                routes: quickTripRoutes,
-                bestRoutePick: quickTripBestRoute
-            ),
-            DestinationGroup(
-                title: "Best Leisure",
-                routes: bestLeisureRoutes,
-                bestRoutePick: bestLeisureRoutePick
-            ),
-            DestinationGroup(
-                title: "Longer Trips",
-                routes: longerTripRoutes,
-                bestRoutePick: longerTripBestRoute
-            ),
-            DestinationGroup(
-                title: "Day Trips",
-                routes: dayTripRoutes,
-                bestRoutePick: dayTripBestRoute
-            )
-        ].filter { group in
-            !group.routes.isEmpty
-        }
-    }
-
     func clearResults() {
         quickTripRoutes = []
         bestLeisureRoutes = []
