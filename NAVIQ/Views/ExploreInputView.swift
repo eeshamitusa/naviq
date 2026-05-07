@@ -1,12 +1,32 @@
 import SwiftUI
 
 struct ExploreInputView: View {
-    @State private var startLocation: String = "Darling Harbour"
+    @State private var startLocation: String = ""
     @State private var timeHours: Double = 2
     @State private var budget: Double = 40
     @State private var selectedTransport: String = "Any"
 
     let transportOptions = ["Any", "Train", "Bus", "Ferry", "Walk"]
+
+    let knownLocations = [
+        "Circular Quay", "Bondi Beach", "Manly", "Newtown", "Chatswood",
+        "Parramatta", "Darling Harbour", "Barangaroo", "The Rocks", "Cronulla",
+        "Watsons Bay", "Taronga Zoo Sydney", "Mosman", "Sydney Olympic Park",
+        "Katoomba", "Central Station", "UTS Broadway", "Coogee Beach",
+        "Surry Hills", "Glebe", "Rhodes", "Strathfield", "Hornsby",
+        "Penrith", "Liverpool"
+    ]
+
+    var suggestions: [String] {
+        guard startLocation.count >= 2 else { return [] }
+        return knownLocations.filter {
+            $0.lowercased().contains(startLocation.lowercased())
+        }
+    }
+
+    var isValidLocation: Bool {
+        knownLocations.contains(where: { $0.lowercased() == startLocation.lowercased() })
+    }
 
     var body: some View {
         ZStack {
@@ -46,9 +66,11 @@ struct ExploreInputView: View {
                             Image(systemName: "location.circle.fill")
                                 .foregroundStyle(Color(red: 0.2, green: 0.7, blue: 0.9))
                             VStack(alignment: .leading, spacing: 2) {
-                                TextField("", text: $startLocation)
+                                TextField("Type your location...", text: $startLocation)
                                     .font(.system(size: 17, weight: .semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundColor(Color(red: 0.6, green: 0.7, blue: 0.9))
+                                    .tint(.white)
+                                    .accentColor(.white)
                                 Text("Sydney NSW")
                                     .font(.caption)
                                     .foregroundStyle(.gray)
@@ -57,6 +79,31 @@ struct ExploreInputView: View {
                         .padding(16)
                         .background(Color(red: 0.12, green: 0.16, blue: 0.24))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        if !suggestions.isEmpty && !isValidLocation {
+                            VStack(spacing: 0) {
+                                ForEach(suggestions, id: \.self) { suggestion in
+                                    Button {
+                                        startLocation = suggestion
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "location.circle.fill")
+                                                .foregroundStyle(Color(red: 0.2, green: 0.7, blue: 0.9))
+                                                .font(.caption)
+                                            Text(suggestion)
+                                                .font(.system(size: 15, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
+                                    }
+                                    Divider()
+                                        .background(Color.gray.opacity(0.3))
+                                }
+                            }
+                            .background(Color(red: 0.12, green: 0.16, blue: 0.24))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
                     }
 
                     // Time + Budget row
@@ -142,7 +189,8 @@ struct ExploreInputView: View {
                     NavigationLink(destination: ExploreResultsView(
                         startLocationName: startLocation,
                         userTimeMinutes: Int(timeHours * 60),
-                        budget: budget
+                        budget: budget,
+                        selectedTransport: selectedTransport
                     )) {
                         HStack {
                             Text("Show Reachable Destinations")
@@ -156,6 +204,8 @@ struct ExploreInputView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .disabled(!isValidLocation)
+                    .opacity(isValidLocation ? 1.0 : 0.5)
                     .padding(.top, 8)
                 }
                 .padding(24)

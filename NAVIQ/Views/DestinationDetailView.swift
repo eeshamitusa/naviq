@@ -4,18 +4,21 @@ struct DestinationDetailView: View {
     let route: RouteResult
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                headerSection
-                statPillsSection
-                costTimeSummarySection
-                routeBreakdownSection
-                startTripButton
+        ZStack {
+            Color(red: 0.07, green: 0.09, blue: 0.13).ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    headerSection
+                    statPillsSection
+                    costTimeSummarySection
+                    routeBreakdownSection
+                    startTripButton
+                }
+                .padding()
             }
-            .padding()
         }
         .navigationTitle(route.destination.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     // MARK: - Header
@@ -29,7 +32,7 @@ struct DestinationDetailView: View {
 
                 Text(route.destination.category.displayName)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
 
                 Spacer()
 
@@ -44,14 +47,15 @@ struct DestinationDetailView: View {
 
             Text(route.destination.name)
                 .font(.largeTitle.bold())
+                .foregroundStyle(.white)
 
             Text(route.destination.shortDescription)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
 
             Label(route.destination.streetAddress, systemImage: "mappin.and.ellipse")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
 
             tagRow
         }
@@ -65,7 +69,8 @@ struct DestinationDetailView: View {
                         .font(.caption.weight(.medium))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Color(.systemGray6))
+                        .background(Color(red: 0.12, green: 0.16, blue: 0.24))
+                        .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
             }
@@ -102,24 +107,25 @@ struct DestinationDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Cost and time summary")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             HStack {
-                SummaryLine(label: "Estimated travel time", value: route.formattedTravelTime)
+                SummaryLine(label: "Estimated travel time", value: route.formattedTravelTime).foregroundStyle(.white)
                 Spacer()
             }
 
             HStack {
-                SummaryLine(label: "Estimated transport cost", value: route.formattedCost)
+                SummaryLine(label: "Estimated transport cost", value: route.formattedCost).foregroundStyle(.white)
                 Spacer()
             }
 
             HStack {
-                SummaryLine(label: "Route steps", value: "\(route.steps.count)")
+                SummaryLine(label: "Route steps", value: "\(route.steps.count)").foregroundStyle(.white)
                 Spacer()
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(red: 0.12, green: 0.16, blue: 0.24))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -129,6 +135,7 @@ struct DestinationDetailView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Route breakdown")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             ForEach(route.steps) { step in
                 RouteStepRow(step: step)
@@ -169,17 +176,18 @@ private struct DetailStatPill: View {
                 .foregroundStyle(.blue)
 
             Text(value)
-                .font(.subheadline.weight(.bold))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
 
             Text(title)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Color(.systemGray6))
+        .background(Color(red: 0.12, green: 0.16, blue: 0.24))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -192,7 +200,7 @@ private struct SummaryLine: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
 
             Spacer()
 
@@ -227,28 +235,30 @@ private struct RouteStepRow: View {
 
                     Text(step.mode.displayName)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.gray)
 
                     if let lineName = step.lineName {
                         Text(lineName)
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color(.systemGray6))
+                            .background(Color(red: 0.12, green: 0.16, blue: 0.24))
+                            .foregroundStyle(.white)
                             .clipShape(Capsule())
                     }
                 }
 
                 Text(step.instruction)
                     .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
 
                 Text("\(step.fromName) → \(step.toName)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
 
                 Text("\(step.durationMinutes) min")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
             }
             .padding(.bottom, 12)
         }

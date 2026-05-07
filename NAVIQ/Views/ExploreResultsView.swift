@@ -7,11 +7,12 @@ struct ExploreResultsView: View {
     let startLocationName: String
     let userTimeMinutes: Int
     let budget: Double
+    let selectedTransport: String
 
     var body: some View {
-        ZStack {
-            Color(red: 0.07, green: 0.09, blue: 0.13).ignoresSafeArea()
-            NavigationStack {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.07, green: 0.09, blue: 0.13).ignoresSafeArea()
                 VStack(spacing: 0) {
                     statusSection
                     
@@ -26,6 +27,7 @@ struct ExploreResultsView: View {
                     }
                 }
                 .navigationTitle("Explore")
+                .toolbarColorScheme(.dark, for: .navigationBar)
                 .task {
                     await loadRoutes()
                 }
@@ -43,12 +45,12 @@ struct ExploreResultsView: View {
 
             Text(statusMessage)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .background(Color(.systemGray6))
+        .background(Color(red: 0.07, green: 0.09, blue: 0.13))
     }
 
     private var statusMessage: String {
@@ -89,14 +91,24 @@ struct ExploreResultsView: View {
                                 isBestPick: group.bestRoutePick?.id == route.id
                             )
                         }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                 } header: {
                     Text(group.title)
+                        .foregroundStyle(.white)
+                        .font(.system(size: 13, weight: .bold))
+                        .textCase(nil)
                 }
+                .listRowBackground(Color.clear)
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color(red: 0.07, green: 0.09, blue: 0.13))
     }
+
 
     // MARK: - Loading / Empty / Error
 
@@ -107,7 +119,7 @@ struct ExploreResultsView: View {
 
             Text("Finding destinations that match your time and budget...")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
         }
         .padding()
@@ -118,14 +130,14 @@ struct ExploreResultsView: View {
         VStack(spacing: 16) {
             Image(systemName: "map")
                 .font(.largeTitle)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
 
             Text("No matching destinations")
                 .font(.headline)
 
             Text("Try increasing your available time or budget.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Button("Try Again") {
@@ -150,7 +162,7 @@ struct ExploreResultsView: View {
 
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Button("Retry") {
@@ -170,7 +182,8 @@ struct ExploreResultsView: View {
         await viewModel.findReachableDestinations(
             startLocationName: startLocationName,
             userTimeMinutes: userTimeMinutes,
-            budget: budget
+            budget: budget,
+            selectedTransport: selectedTransport
         )
     }
 }
@@ -237,6 +250,7 @@ private struct RouteResultRow: View {
     ExploreResultsView(
         startLocationName: "Darling Harbour",
         userTimeMinutes: 120,
-        budget: 20.00
+        budget: 20.00,
+        selectedTransport: "Any"
     )
 }
