@@ -17,6 +17,9 @@ struct SmartPlanResult: Identifiable {
         let minutes = totalTravelTimeMinutes % 60
 
         if hours > 0 {
+            if minutes == 0 {
+                return "\(hours)h"
+            }
             return "\(hours)h \(minutes)m"
         } else {
             return "\(minutes)m"
@@ -35,20 +38,45 @@ struct SmartPlanResult: Identifiable {
         max(budgetAUD - totalCostAUD, 0)
     }
 
-    var feasibilityLabel: String {
-        if totalTravelTimeMinutes <= Int(Double(availableTimeMinutes) * 0.8) &&
-            totalCostAUD <= budgetAUD * 0.8 {
-            return "Yes"
+    var formattedRemainingTime: String {
+        let hours = remainingTimeMinutes / 60
+        let minutes = remainingTimeMinutes % 60
+
+        if hours > 0 {
+            if minutes == 0 {
+                return "\(hours)h"
+            }
+            return "\(hours)h \(minutes)m"
         } else {
+            return "\(minutes)m"
+        }
+    }
+
+    var formattedRemainingBudget: String {
+        String(format: "AUD %.2f", remainingBudgetAUD)
+    }
+
+    var feasibilityLabel: String {
+        let timeUsage = Double(totalTravelTimeMinutes) / Double(max(availableTimeMinutes, 1))
+        let budgetUsage = totalCostAUD / max(budgetAUD, 1)
+
+        if timeUsage <= 0.75 && budgetUsage <= 0.75 {
+            return "Yes"
+        } else if timeUsage <= 1.0 && budgetUsage <= 1.0 {
             return "Risky"
+        } else {
+            return "No"
         }
     }
 
     var feasibilityExplanation: String {
-        if feasibilityLabel == "Yes" {
-            return "Comfortably fits within your time and budget."
-        } else {
-            return "Possible, but leaves less buffer before your deadline."
+        switch feasibilityLabel {
+        case "Yes":
+            return "Comfortably fits within your deadline and budget."
+        case "Risky":
+            return "Possible, but it leaves a smaller buffer before your deadline."
+        default:
+            return "This plan does not fit your constraints."
         }
     }
 }
@@ -79,33 +107,34 @@ final class SmartPlanViewModel: ObservableObject {
         results = []
         bestPlan = nil
 
-        let cleanedCurrentLocation = currentLocationName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanedFinalDestination = finalDestinationName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanedTransport = selectedTransport.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let cleanedCurrentLocation = clean(currentLocationName)
+        let cleanedFinalDestination = clean(finalDestinationName)
+        let cleanedTransport = clean(selectedTransport).lowercased()
 
         guard !cleanedCurrentLocation.isEmpty else {
-            errorMessage = "Please enter your current location."
-            isLoading = false
+            finishWithError("Please enter your current location.")
             return
         }
 
         guard !cleanedFinalDestination.isEmpty else {
-            errorMessage = "Please enter a final destination."
-            isLoading = false
+            finishWithError("Please enter your final destination.")
             return
         }
 
-        guard totalBudget >= 0 else {
-            errorMessage = "Please enter a valid budget."
-            isLoading = false
+        guard totalBudget > 0 else {
+            finishWithError("Please enter a budget greater than 0.")
+            return
+        }
+
+        guard normalize(cleanedCurrentLocation) != normalize(cleanedFinalDestination) else {
+            finishWithError("Your current location and final destination cannot be the same.")
             return
         }
 
         let availableTimeMinutes = minutesUntilDeadline(mustArriveTime)
 
         guard availableTimeMinutes > 0 else {
-            errorMessage = "Your must-arrive time needs to be later than the current time."
-            isLoading = false
+            finishWithError("Please choose an arrival time later than now.")
             return
         }
 
@@ -118,26 +147,31 @@ final class SmartPlanViewModel: ObservableObject {
 
         let firstLegRoutes = await transportService.searchRoutes(input: startInput)
 
-        let possibleFirstLegs = firstLegRoutes.filter { route in
+        let possibleMidpointRoutes = firstLegRoutes.filter { route in
             let isNotFinalDestination = normalize(route.destination.name) != normalize(cleanedFinalDestination)
-            let fitsTime = route.travelTimeMinutes < availableTimeMinutes
-            let fitsBudget = route.costAUD <= totalBudget
+            let isNotStartLocation = normalize(route.destination.name) != normalize(cleanedCurrentLocation)
+            let fitsInitialTime = route.travelTimeMinutes < availableTimeMinutes
+            let fitsInitialBudget = route.costAUD < totalBudget
             let matchesTransport = transportMatches(
                 routeTransportName: route.primaryTransportMode.displayName,
                 selectedTransportName: cleanedTransport
             )
 
-            return isNotFinalDestination && fitsTime && fitsBudget && matchesTransport
+            return isNotFinalDestination &&
+                isNotStartLocation &&
+                fitsInitialTime &&
+                fitsInitialBudget &&
+                matchesTransport
         }
 
         var generatedPlans: [SmartPlanResult] = []
 
-        for firstLeg in possibleFirstLegs {
+        for firstLeg in possibleMidpointRoutes {
             let midpoint = firstLeg.destination
             let remainingTime = availableTimeMinutes - firstLeg.travelTimeMinutes
             let remainingBudget = totalBudget - firstLeg.costAUD
 
-            guard remainingTime > 0, remainingBudget >= 0 else {
+            guard remainingTime > 0, remainingBudget > 0 else {
                 continue
             }
 
@@ -159,7 +193,10 @@ final class SmartPlanViewModel: ObservableObject {
                     selectedTransportName: cleanedTransport
                 )
 
-                return isFinalDestination && fitsRemainingTime && fitsRemainingBudget && matchesTransport
+                return isFinalDestination &&
+                    fitsRemainingTime &&
+                    fitsRemainingBudget &&
+                    matchesTransport
             }) else {
                 continue
             }
@@ -185,32 +222,45 @@ final class SmartPlanViewModel: ObservableObject {
         }
 
         results = generatedPlans.sorted { firstPlan, secondPlan in
-            let firstScore = score(for: firstPlan)
-            let secondScore = score(for: secondPlan)
-
-            return firstScore > secondScore
+            score(for: firstPlan) > score(for: secondPlan)
         }
 
         bestPlan = results.first
 
         if results.isEmpty {
-            errorMessage = "No midpoint plans matched your deadline and budget."
+            errorMessage = "No midpoint plans matched your arrival time and budget. Try choosing a later arrival time, increasing your budget, or selecting Any transport."
         }
 
         isLoading = false
     }
 
     private func score(for plan: SmartPlanResult) -> Double {
-        let destinationValue = Double(plan.midpoint.tags.count) * 8.0
-        let timeBufferValue = Double(plan.remainingTimeMinutes) * 0.25
-        let budgetBufferValue = plan.remainingBudgetAUD * 0.5
-        let shorterTripBonus = 100.0 / Double(max(plan.totalTravelTimeMinutes, 1))
+        let tagValue = Double(plan.midpoint.tags.count) * 8.0
+        let timeBufferValue = Double(plan.remainingTimeMinutes) * 0.35
+        let budgetBufferValue = plan.remainingBudgetAUD * 0.75
+        let shorterTripBonus = 120.0 / Double(max(plan.totalTravelTimeMinutes, 1))
 
-        return destinationValue + timeBufferValue + budgetBufferValue + shorterTripBonus
+        let feasibilityBonus: Double
+        if plan.feasibilityLabel == "Yes" {
+            feasibilityBonus = 30.0
+        } else if plan.feasibilityLabel == "Risky" {
+            feasibilityBonus = 10.0
+        } else {
+            feasibilityBonus = 0.0
+        }
+
+        return tagValue + timeBufferValue + budgetBufferValue + shorterTripBonus + feasibilityBonus
     }
 
     private func minutesUntilDeadline(_ deadline: Date) -> Int {
-        let difference = deadline.timeIntervalSince(Date())
+        let now = Date()
+        var adjustedDeadline = deadline
+
+        if adjustedDeadline <= now {
+            adjustedDeadline = Calendar.current.date(byAdding: .day, value: 1, to: deadline) ?? deadline
+        }
+
+        let difference = adjustedDeadline.timeIntervalSince(now)
         return max(Int(difference / 60), 0)
     }
 
@@ -218,24 +268,18 @@ final class SmartPlanViewModel: ObservableObject {
         routeTransportName: String,
         selectedTransportName: String
     ) -> Bool {
-        let routeTransport = routeTransportName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
+        let routeTransport = clean(routeTransportName).lowercased()
 
         if selectedTransportName == "any" {
             return true
         }
 
-        if selectedTransportName == "walk" {
+        if selectedTransportName == "walk" || selectedTransportName == "walking" {
             return routeTransport == "walk" || routeTransport == "walking"
         }
 
-        return routeTransport == selectedTransportName
-    }
-
-    private func normalize(_ text: String) -> String {
-        text.trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
+        return routeTransport.contains(selectedTransportName) ||
+            selectedTransportName.contains(routeTransport)
     }
 
     private func originCoordinate(for locationName: String) -> Coordinate {
@@ -246,5 +290,20 @@ final class SmartPlanViewModel: ObservableObject {
         }
 
         return MockData.mockOrigin
+    }
+
+    private func clean(_ text: String) -> String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func normalize(_ text: String) -> String {
+        clean(text).lowercased()
+    }
+
+    private func finishWithError(_ message: String) {
+        errorMessage = message
+        results = []
+        bestPlan = nil
+        isLoading = false
     }
 }
