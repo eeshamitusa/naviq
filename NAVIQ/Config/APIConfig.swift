@@ -2,8 +2,6 @@
 //  APIConfig.swift
 //  NAVIQ
 //
-//  Created by Matthew Ashley on 4/5/2026.
-//
 
 import Foundation
 

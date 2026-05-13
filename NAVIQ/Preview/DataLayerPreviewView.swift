@@ -5,17 +5,6 @@
 //  Debug view to verify the data layer works correctly.
 //  This is NOT Aneet's production UI — it's a temporary preview for Seungmin's data layer.
 //
-//  Usage (pick one):
-//
-//  Option 1) Xcode Preview (fastest)
-//    Open this file and toggle the canvas (Cmd+Opt+Enter).
-//    You'll see all 30 results in a scrollable list.
-//
-//  Option 2) Simulator
-//    Temporarily change NAVIQApp.swift:
-//      WindowGroup { DataLayerPreviewView() }
-//    Then run (Cmd+R).
-//
 
 import SwiftUI
 

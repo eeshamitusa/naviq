@@ -4,6 +4,15 @@ Seungmin's deliverable for **Task 1 (Data + Models)** and **API Integration**.
 Based on the team's 30 Sydney destinations from `Locations.docx`.
 
 ---
+---
+
+## GitHub Repository
+
+The source code for this project is available at:
+
+https://github.com/EeshaMITUSA/NAVIQ
+
+---
 
 ## Folder Structure
 
@@ -97,4 +106,4 @@ ForEach(result.steps) { step in
 Map(coordinateRegion: ..., annotationItems: [result.destination]) { dest in
     MapMarker(coordinate: dest.coordinate.clLocation)
 }
-``
+
