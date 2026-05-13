@@ -4,7 +4,6 @@
 //
 //  Main entry point for the whole team.
 //
-//  Eesha's ViewModel only calls service.searchRoutes(input:).
 //  Internally:
 //    - useMockOnly == true  -> return mock data immediately
 //    - API mode             -> call 30 destinations in parallel

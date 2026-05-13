@@ -1,38 +1,111 @@
 import SwiftUI
 
+@MainActor
 struct ExploreResultsView: View {
 
-    @StateObject private var viewModel = ExploreViewModel()
+    @StateObject private var viewModel: ExploreViewModel
 
     let startLocationName: String
     let userTimeMinutes: Int
     let budget: Double
     let selectedTransport: String
 
+    init(
+        startLocationName: String,
+        userTimeMinutes: Int,
+        budget: Double,
+        selectedTransport: String
+    ) {
+        self.startLocationName = startLocationName
+        self.userTimeMinutes = userTimeMinutes
+        self.budget = budget
+        self.selectedTransport = selectedTransport
+        _viewModel = StateObject(wrappedValue: ExploreViewModel())
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.07, green: 0.09, blue: 0.13).ignoresSafeArea()
+                backgroundColor
+
                 VStack(spacing: 0) {
                     statusSection
-                    
-                    if viewModel.isLoading {
-                        loadingSection
-                    } else if let errorMessage = viewModel.errorMessage {
-                        errorSection(errorMessage)
-                    } else if viewModel.groupedResults().isEmpty {
-                        emptySection
-                    } else {
-                        resultsList
-                    }
-                }
-                .navigationTitle("Explore")
-                .toolbarColorScheme(.dark, for: .navigationBar)
-                .task {
-                    await loadRoutes()
+                    contentSection
                 }
             }
+            .navigationTitle("Explore")
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .task {
+                await loadRoutes()
+            }
         }
+    }
+
+    // MARK: - Main Content
+
+    private var contentSection: some View {
+        Group {
+            if viewModel.isLoading {
+                loadingSection
+            } else if let errorMessage = viewModel.errorMessage {
+                errorSection(errorMessage)
+            } else if destinationGroups.isEmpty {
+                emptySection
+            } else {
+                resultsList(groups: destinationGroups)
+            }
+        }
+    }
+
+    private var destinationGroups: [DestinationGroup] {
+        var groups: [DestinationGroup] = []
+
+        if !viewModel.quickTripRoutes.isEmpty {
+            groups.append(
+                DestinationGroup(
+                    title: "Quick Trips",
+                    routes: viewModel.quickTripRoutes,
+                    bestRoutePick: viewModel.quickTripBestRoute
+                )
+            )
+        }
+
+        if !viewModel.bestLeisureRoutes.isEmpty {
+            groups.append(
+                DestinationGroup(
+                    title: "Best Leisure",
+                    routes: viewModel.bestLeisureRoutes,
+                    bestRoutePick: viewModel.bestLeisureRoutePick
+                )
+            )
+        }
+
+        if !viewModel.longerTripRoutes.isEmpty {
+            groups.append(
+                DestinationGroup(
+                    title: "Longer Trips",
+                    routes: viewModel.longerTripRoutes,
+                    bestRoutePick: viewModel.longerTripBestRoute
+                )
+            )
+        }
+
+        if !viewModel.dayTripRoutes.isEmpty {
+            groups.append(
+                DestinationGroup(
+                    title: "Day Trips",
+                    routes: viewModel.dayTripRoutes,
+                    bestRoutePick: viewModel.dayTripBestRoute
+                )
+            )
+        }
+
+        return groups
+    }
+
+    private var backgroundColor: some View {
+        Color(red: 0.07, green: 0.09, blue: 0.13)
+            .ignoresSafeArea()
     }
 
     // MARK: - Status Section
@@ -71,37 +144,19 @@ struct ExploreResultsView: View {
             route.isLiveData
         }
 
-        return hasLiveData
-            ? "Showing NSW API route results."
-            : "Showing mock fallback route results."
+        if hasLiveData {
+            return "Showing NSW API route results."
+        } else {
+            return "Showing mock fallback route results."
+        }
     }
 
     // MARK: - Results List
 
-    private var resultsList: some View {
+    private func resultsList(groups: [DestinationGroup]) -> some View {
         List {
-            ForEach(viewModel.groupedResults()) { group in
-                Section {
-                    ForEach(group.routes) { route in
-                        NavigationLink {
-                            DestinationDetailView(route: route)
-                        } label: {
-                            RouteResultRow(
-                                route: route,
-                                isBestPick: group.bestRoutePick?.id == route.id
-                            )
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                    }
-                } header: {
-                    Text(group.title)
-                        .foregroundStyle(.white)
-                        .font(.system(size: 13, weight: .bold))
-                        .textCase(nil)
-                }
-                .listRowBackground(Color.clear)
+            ForEach(groups, id: \.title) { group in
+                resultSection(group)
             }
         }
         .listStyle(.plain)
@@ -109,6 +164,52 @@ struct ExploreResultsView: View {
         .background(Color(red: 0.07, green: 0.09, blue: 0.13))
     }
 
+    private func resultSection(_ group: DestinationGroup) -> some View {
+        Section {
+            ForEach(group.routes, id: \.destination.name) { route in
+                resultRow(
+                    route: route,
+                    bestRoutePick: group.bestRoutePick
+                )
+            }
+        } header: {
+            sectionHeader(title: group.title)
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    private func resultRow(
+        route: RouteResult,
+        bestRoutePick: RouteResult?
+    ) -> some View {
+        let isBestPick = bestRoutePick?.destination.name == route.destination.name
+
+        return NavigationLink {
+            DestinationDetailView(route: route)
+        } label: {
+            RouteResultRow(
+                route: route,
+                isBestPick: isBestPick
+            )
+        }
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+        .listRowInsets(
+            EdgeInsets(
+                top: 4,
+                leading: 16,
+                bottom: 4,
+                trailing: 16
+            )
+        )
+    }
+
+    private func sectionHeader(title: String) -> some View {
+        Text(title)
+            .foregroundStyle(.white)
+            .font(.system(size: 13, weight: .bold))
+            .textCase(nil)
+    }
 
     // MARK: - Loading / Empty / Error
 
@@ -134,6 +235,7 @@ struct ExploreResultsView: View {
 
             Text("No matching destinations")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             Text("Try increasing your available time or budget.")
                 .font(.subheadline)
@@ -159,6 +261,7 @@ struct ExploreResultsView: View {
 
             Text("Something went wrong")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             Text(message)
                 .font(.subheadline)
@@ -196,6 +299,24 @@ private struct RouteResultRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            bestPickBadge
+
+            HStack(alignment: .top) {
+                routeTextSection
+
+                Spacer()
+
+                routeCostSection
+            }
+        }
+        .padding(16)
+        .background(cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(cardBorder)
+    }
+
+    private var bestPickBadge: some View {
+        Group {
             if isBestPick {
                 Text("BEST PICK")
                     .font(.system(size: 10, weight: .bold))
@@ -205,47 +326,60 @@ private struct RouteResultRow: View {
                     .foregroundStyle(.white)
                     .clipShape(Capsule())
             }
+        }
+    }
 
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(route.destination.name)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text(route.primaryTransportMode.displayName)
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                    HStack(spacing: 4) {
-                        ForEach(route.destination.tags.prefix(2), id: \.self) { tag in
-                            Text(tag)
-                                .font(.caption)
-                                .foregroundStyle(.gray)
-                        }
-                    }
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(route.formattedCost)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.green)
-                    Text(route.formattedTravelTime)
+    private var routeTextSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(route.destination.name)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+
+            Text(route.primaryTransportMode.displayName)
+                .font(.caption)
+                .foregroundStyle(.gray)
+
+            HStack(spacing: 4) {
+                ForEach(Array(route.destination.tags.prefix(2)), id: \.self) { tag in
+                    Text(tag)
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
             }
         }
-        .padding(16)
-        .background(isBestPick
-            ? Color(red: 0.1, green: 0.18, blue: 0.28)
-            : Color(red: 0.1, green: 0.13, blue: 0.19))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(isBestPick
+    }
+
+    private var routeCostSection: some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            Text(route.formattedCost)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.green)
+
+            Text(route.formattedTravelTime)
+                .font(.caption)
+                .foregroundStyle(.gray)
+        }
+    }
+
+    private var cardBackgroundColor: Color {
+        if isBestPick {
+            return Color(red: 0.1, green: 0.18, blue: 0.28)
+        } else {
+            return Color(red: 0.1, green: 0.13, blue: 0.19)
+        }
+    }
+
+    private var cardBorder: some View {
+        RoundedRectangle(cornerRadius: 14)
+            .stroke(
+                isBestPick
                     ? Color(red: 0.2, green: 0.6, blue: 1.0).opacity(0.5)
-                    : Color.clear, lineWidth: 1)
-        )
+                    : Color.clear,
+                lineWidth: 1
+            )
     }
 }
+
 #Preview {
     ExploreResultsView(
         startLocationName: "Darling Harbour",

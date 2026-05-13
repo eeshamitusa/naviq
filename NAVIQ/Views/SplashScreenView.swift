@@ -2,8 +2,6 @@
 //  SplashScreenView.swift
 //  NAVIQ
 //
-//  Created by Aneet Kaur on 7/5/2026.
-//
 
 import SwiftUI
 
